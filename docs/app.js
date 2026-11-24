@@ -49,7 +49,7 @@ async function loadPhoto(file) {
   marker = null;
   clearAnswer();
   drawPreview();
-  $('tapHint').textContent = '👆 Ткни в предмет, о котором хочешь узнать';
+  $('tapHint').textContent = '👆 Ткни в предмет — и я сразу расскажу, что это';
   show('photoScreen');
 }
 
@@ -75,13 +75,15 @@ function drawMarker(ctx, w, h) {
 }
 
 $('photo').addEventListener('click', (e) => {
+  if (!bitmap) return;
   const rect = e.target.getBoundingClientRect();
   marker = {
     x: Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)),
     y: Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height)),
   };
   drawPreview();
-  $('tapHint').textContent = '✅ Отмечено. Можно ткнуть в другое место.';
+  $('tapHint').textContent = '✅ Отмечено. Можно ткнуть в другой предмет.';
+  ask('auto');  // отвечаем сразу, без кнопок
 });
 
 function photoForUpload() {
@@ -135,9 +137,12 @@ async function callServer(body) {
   return data;
 }
 
+let requestNo = 0;  // если ткнули в другой предмет, пока ждём, — показываем только последний ответ
+
 async function ask(mode, question = '') {
   if (!settings.url || !settings.secret) { openSettings(); return; }
   if (!bitmap) return;
+  const my = ++requestNo;
 
   clearAnswer();
   setBusy(true);
@@ -154,9 +159,11 @@ async function ask(mode, question = '') {
       marker: Boolean(marker),
       age: settings.age, city: settings.city,
     });
+    if (my !== requestNo) return;
     showAnswer(data.text);
     saveToHistory(mode, question, data.text);
   } catch (err) {
+    if (my !== requestNo) return;
     const msg = err instanceof TypeError
       ? 'Нет связи с сервером. Проверь интернет и адрес в настройках.'
       : err.message;
@@ -164,17 +171,15 @@ async function ask(mode, question = '') {
     $('error').hidden = false;
   } finally {
     clearInterval(timer);
-    setBusy(false);
+    if (my === requestNo) setBusy(false);
   }
 }
 
 function setBusy(busy) {
   $('loading').hidden = !busy;
-  for (const id of ['aboutBtn', 'historyInfoBtn', 'askInput']) $(id).disabled = busy;
+  $('askInput').disabled = busy;
 }
 
-$('aboutBtn').addEventListener('click', () => ask('about'));
-$('historyInfoBtn').addEventListener('click', () => ask('history'));
 $('askForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const q = $('askInput').value.trim();
@@ -233,9 +238,9 @@ function plain(md) {
 }
 
 function kidPart(md) {
-  // берём разделы «Как рассказать…» и «Вопрос ребёнку»
+  // берём раздел «Для ребёнка» (и разделы из старых ответов: «Как рассказать…», «Вопрос ребёнку»)
   const parts = md.split(/^##\s+/m);
-  const keep = parts.filter((p) => /^(как рассказать|вопрос)/i.test(p.trim()));
+  const keep = parts.filter((p) => /^(для ребёнка|для ребенка|как рассказать|вопрос ребёнку|вопрос ребенку)/i.test(p.trim()));
   return keep.length ? keep.map((p) => p.split('\n').slice(1).join('\n')).join('\n') : md;
 }
 
@@ -263,7 +268,7 @@ $('stopBtn').addEventListener('click', stopSpeaking);
 
 // ---------- история
 
-const MODE_LABEL = { about: 'Что это', history: 'История', ask: 'Вопрос' };
+const MODE_LABEL = { auto: 'Справка', about: 'Что это', history: 'История', ask: 'Вопрос' };
 
 function titleOf(text) {
   const m = text.match(/##\s*Что это\s*\n+([^\n]+)/i);

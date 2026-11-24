@@ -1,6 +1,6 @@
 // Кэширует оболочку приложения, чтобы оно быстро открывалось.
 // При изменении файлов приложения увеличьте номер версии.
-const CACHE = 'chto-eto-v1';
+const CACHE = 'chto-eto-v2';
 const SHELL = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
