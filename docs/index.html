@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Что это?</title>
+  <meta name="theme-color" content="#1f6f5c">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Что это?</h1>
+    <div class="top-actions">
+      <button id="historyBtn" class="icon-btn" aria-label="История">🕘</button>
+      <button id="settingsBtn" class="icon-btn" aria-label="Настройки">⚙️</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="pickScreen" class="pick">
+      <p class="lead">Сфотографируй что угодно, ткни в предмет — и узнай, что это и какая у него история.</p>
+      <label class="big-btn primary">
+        📷 Сфотографировать
+        <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+      </label>
+      <label class="big-btn">
+        🖼 Выбрать из галереи
+        <input id="galleryInput" type="file" accept="image/*" hidden>
+      </label>
+      <p id="setupHint" class="hint warn" hidden>Сначала открой ⚙️ Настройки и вставь адрес сервера и пароль.</p>
+    </section>
+
+    <section id="photoScreen" hidden>
+      <div class="photo-wrap">
+        <canvas id="photo"></canvas>
+      </div>
+      <p id="tapHint" class="hint">👆 Ткни в предмет, о котором хочешь узнать</p>
+
+      <div class="actions">
+        <button id="aboutBtn" class="big-btn primary">🔎 Что это?</button>
+        <button id="historyInfoBtn" class="big-btn accent">🏛 История</button>
+      </div>
+      <form id="askForm" class="ask">
+        <input id="askInput" type="text" placeholder="Или задай свой вопрос…" autocomplete="off">
+        <button type="submit" class="small-btn">Спросить</button>
+      </form>
+      <button id="newPhotoBtn" class="link-btn">← Другое фото</button>
+
+      <div id="loading" class="loading" hidden>
+        <div class="spinner"></div>
+        <span id="loadingText">Думаю…</span>
+      </div>
+      <p id="error" class="hint error" hidden></p>
+
+      <article id="answer" class="answer" hidden>
+        <div class="answer-tools">
+          <button id="speakBtn" class="small-btn">🔊 Прочитать вслух</button>
+          <button id="speakKidBtn" class="small-btn">🧸 Только для ребёнка</button>
+          <button id="stopBtn" class="small-btn" hidden>⏹ Стоп</button>
+        </div>
+        <div id="answerText"></div>
+      </article>
+    </section>
+
+    <section id="historyScreen" hidden>
+      <div class="screen-head">
+        <h2>Что мы уже узнали</h2>
+        <button id="historyClose" class="link-btn">Закрыть</button>
+      </div>
+      <p id="historyEmpty" class="hint">Здесь будут сохраняться ответы.</p>
+      <ul id="historyList" class="history"></ul>
+      <button id="historyClear" class="link-btn danger" hidden>Очистить историю</button>
+    </section>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" id="settingsForm">
+      <h2>Настройки</h2>
+      <label>Адрес сервера (ссылка на функцию Yandex Cloud)
+        <input id="sUrl" type="url" placeholder="https://functions.yandexcloud.net/…" required>
+      </label>
+      <label>Пароль приложения (APP_SECRET)
+        <input id="sSecret" type="password" required>
+      </label>
+      <label>Возраст ребёнка
+        <input id="sAge" type="text" placeholder="например, 4 года">
+      </label>
+      <label>Город (необязательно, помогает с историей)
+        <input id="sCity" type="text" placeholder="например, Санкт-Петербург">
+      </label>
+      <p id="sStatus" class="hint"></p>
+      <div class="dialog-actions">
+        <button type="button" id="sTest" class="small-btn">Проверить связь</button>
+        <button type="submit" value="save" class="small-btn primary">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
